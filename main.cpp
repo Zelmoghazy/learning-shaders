@@ -8,6 +8,16 @@
 #include <fstream>
 #include <sstream>
 
+
+// Use the better GPU ?
+#ifdef _WIN32
+#include <windows.h>
+extern "C" {
+    __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;       // Optimus: force switch to discrete GPU
+    __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1; //AMD
+}
+#endif
+
 std::string readShaderSource(const std::string& filepath) 
 {
     std::ifstream file(filepath);
@@ -169,15 +179,15 @@ int main(void)
             glUniform1f(glGetUniformLocation(shaderProgram, "ro_z"), ro_z);
 
             static float lt_x = 0.0f;
-            ImGui::SliderFloat("lt_x", &lt_x, -10.0, 10.0);
+            ImGui::SliderFloat("lt_x", &lt_x, 0.0, 1.0);
             glUniform1f(glGetUniformLocation(shaderProgram, "lt_x"), lt_x);
 
             static float lt_y = 0.0f;
-            ImGui::SliderFloat("lt_y", &lt_y, -10.0, 10.0);
+            ImGui::SliderFloat("lt_y", &lt_y, -1.0, 1.0);
             glUniform1f(glGetUniformLocation(shaderProgram, "lt_y"), lt_y);
 
             static float lt_z = 0.0f;
-            ImGui::SliderFloat("lt_z", &lt_z, -10.0, 10.0);
+            ImGui::SliderFloat("lt_z", &lt_z, -1.0, 1.0);
             glUniform1f(glGetUniformLocation(shaderProgram, "lt_z"), lt_z);
         ImGui::End();
 

@@ -1,11 +1,11 @@
 #version 330 core
 
 out vec4 FragColor;
-in vec2 TexCoord;
+in vec2  TexCoord;
 
 uniform float u_time;
-uniform vec2 u_resolution;
-uniform vec3 u_mouse;
+uniform vec2  u_resolution;
+uniform vec3  u_mouse;
 
 uniform float ro_x;
 uniform float ro_y;
@@ -22,7 +22,27 @@ uniform float zoom_level;
 void mainImage(out vec4 fragColor, in vec2 fragCoord) 
 {
     // Output is a pixel color
-    fragColor = vec4(0.0,1.0,1.0,1.0);
+    fragColor = vec4(0.675, 0.576, 0.89, 1.0);
+} 
+#endif
+
+#if 0
+void mainImage(out vec4 fragColor, in vec2 fragCoord) 
+{   
+    //        pixel coordinates , screen resolution (normalization)
+    vec2 uv = fragCoord.xy / u_resolution.xy;
+    
+    fragColor = vec4(uv.x, 0.0, 0.0, 1.0);
+} 
+#endif
+
+#if 0
+void mainImage(out vec4 fragColor, in vec2 fragCoord) 
+{   
+    //        pixel coordinates , screen resolution (normalization)
+    vec2 uv = fragCoord.xy / u_resolution.xy;
+    
+    fragColor = vec4(0.0, 0.0, uv.y, 1.0);
 } 
 #endif
 
@@ -34,6 +54,24 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     
     fragColor = vec4(uv.x, 0.0, uv.y, 1.0);
 } 
+#endif
+
+#if 0
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    vec2 uv = fragCoord/u_resolution.xy;
+    vec3 col = cos(u_time+vec3(0,2.0,4.0));
+    fragColor = vec4(col,1.0);
+}
+#endif
+
+#if 0
+void mainImage( out vec4 fragColor, in vec2 fragCoord )
+{
+    vec2 uv = fragCoord/u_resolution.xy;
+    vec3 col = 0.5 + 0.5 * cos(u_time+vec3(0,2.0,4.0));
+    fragColor = vec4(col,1.0);
+}
 #endif
 
 #if 0
@@ -71,7 +109,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 } 
 #endif
 
-#if 0 
+#if 0
 void mainImage(out vec4 fragColor, in vec2 fragCoord) 
 {   
     vec2 uv = fragCoord.xy / u_resolution.xy;
@@ -117,17 +155,15 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
     float d = length(uv);
     float c = d;
 
-    if(d< 0.3){
-        c = 1.0;
-    }else{
-        c = 0.0;
-    }
+    float rad = 0.3;
+
+    c = d < rad ? 1.0 : 0.0;
 
     fragColor = vec4(vec3(c), 1.0);
 } 
 #endif
 
-#if 0 
+#if 0
 void mainImage(out vec4 fragColor, in vec2 fragCoord) 
 {   
     vec2 uv = fragCoord.xy / u_resolution.xy;
@@ -137,16 +173,17 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 
     uv.x *= u_resolution.x / u_resolution.y;
 
-    float d = length(uv);
-    float r = 0.3;
+    float d  = length(uv);
+    float r  = 0.4;
+    float aa = 0.003;
 
-    float c = smoothstep(r,r-0.003, d);
+    float c = smoothstep(r,r-aa, d);
 
     fragColor = vec4(vec3(c), 1.0);
 } 
 #endif
 
-#if 0 
+#if 0
 float circle(vec2 uv, vec2 pos, float rad, float blur)
 {
     uv.x -= 0.5;
@@ -171,7 +208,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 } 
 #endif
 
-#if 0 
+#if 0
 float circle(vec2 uv, vec2 pos, float rad, float blur)
 {
     uv.x -= 0.5;
@@ -198,7 +235,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 {   
     vec2 uv = fragCoord.xy / u_resolution.xy;
 
-    float c = circle_outline(uv, vec2(0,0), 0.3, 0.002, 0.01);
+    float c = circle_outline(uv, vec2(0,0), 0.3, 0.002, 0.05);
 
     fragColor = vec4(vec3(c), 1.0);
 } 
@@ -207,21 +244,18 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 #if 0
 float rectangle(vec2 uv, vec2 pos, vec2 dim)
 {
-    uv.x -= 0.5;
-    uv.y -= 0.5;
-
-    uv.x *= u_resolution.x / u_resolution.y;
-
     vec2 d = abs(uv-pos) - dim;
-    float l = length(max(d,0.0)) + min(max(d.x,d.y),0.0);
+    float l = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
     return 1.0 - step(0.0, l);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) 
 {   
-    vec2 uv = fragCoord.xy / u_resolution.xy;
+    float aspect = u_resolution.x / u_resolution.y;
+    vec2 uv = (2.0*fragCoord.xy-u_resolution.xy)/u_resolution.y;
+    uv.x *= aspect;
 
-    float c = rectangle(uv, vec2(0.0,0.0), vec2(0.3,0.2)) ;
+    float c = rectangle(uv, vec2(0.0, 0.0), vec2(0.3*aspect, 0.3));
     fragColor = vec4(vec3(c), 1.0);
 } 
 #endif 
@@ -229,11 +263,6 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 #if 0
 float rectangle(vec2 uv, vec2 pos, vec2 dim)
 {
-    uv.x -= 0.5;
-    uv.y -= 0.5;
-
-    uv.x *= u_resolution.x / u_resolution.y;
-
     vec2 d = abs(uv-pos) - dim;
     return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
 }
@@ -241,20 +270,22 @@ float rectangle(vec2 uv, vec2 pos, vec2 dim)
 float rounded_rect(vec2 uv, vec2 pos, vec2 dim, float rad)
 {
     float c = rectangle(uv, pos, dim) - rad;
-    float aa = 0.002;
+    float aa = 0.003;
     c = 1 - smoothstep(-aa, aa, c);
     return c;
 }
 
-
 void mainImage(out vec4 fragColor, in vec2 fragCoord) 
 {   
-    vec2 uv = fragCoord.xy / u_resolution.xy;
+    float aspect = u_resolution.x / u_resolution.y;
+    vec2 uv = (2.0*fragCoord.xy-u_resolution.xy)/u_resolution.y;
+    uv.x *= aspect;
 
-    float c = rounded_rect(uv, vec2(0.0,0.0), vec2(0.3,0.2), 0.1) ;
+    float c = rounded_rect(uv, vec2(0.0,0.0), vec2(0.5*aspect, 0.2), 0.1) ;
     fragColor = vec4(vec3(c), 1.0);
 } 
 #endif 
+
 
 #if 0
 
@@ -1351,50 +1382,189 @@ void mainImage(out vec4 fragColor, vec2 fragCoord)
 #endif
 
 #if 0
-vec2 p=(FC.xy-r*.5)/r.y;
-for(float i=1.,a;
-    i<1e2;
-    i*=1.05,
-    a=mod(cos(cos(i*3e3)*3e3)*3e3+t,10.),
-    o+=(5.-abs(a-5.))*(cos(i+p.x*5.+vec4(0,2,1,0))+1.)/1e3/max(a=length(cos((p*sqrt(i)+i*i)*rotate2D(i)+a*sqrt(i)*.01))-.05,.01-a*.1));
-    o=tanh(pow(o.rgga*o.rgra,vec4(1,1,2,1)));
-    o+=(1.-o)*(cos(p.y*PI+vec4(0,1,3,0))*.1);
+#define PI 3.141592653589793
+
+// 2D Rotation Matrix
+mat2 rotate2D(float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return mat2(c, -s, s, c);
+}
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) 
+{
+    vec2 p = (fragCoord.xy - u_resolution.xy * 0.5) / u_resolution.y;
+    vec4 o = vec4(0.0);
+
+    for (float i = 1.0, a; i < 1e2; i *= 1.05) {
+        a = mod(cos(cos(i * 3e3) * 3e3) * 3e3 + u_time, 10.0);
+        o += (5.0 - abs(a - 5.0)) * (cos(i + p.x * 5.0 + vec4(0, 2, 1, 0)) + 1.0) / 1e3 / max(a = length(cos((p * sqrt(i) + i * i) * rotate2D(i) + a * sqrt(i) * 0.01)) - 0.05, 0.01 - a * 0.1);
+    }
+
+    o = tanh(pow(o.rgga * o.rgra, vec4(1, 1, 2, 1)));
+    o += (1.0 - o) * (cos(p.y * PI + vec4(0, 1, 3, 0)) * 0.1);
+
+    fragColor = o;
+}
 #endif
 
 #if 0
 
-vec2 p=(FC.xy-r*.5)/r.y,v;for(float i=1.;i<1e1;i*=1.5)v=floor(.2+p*.5*rotate2D(floor(i*9.)*PI/4.)*i+fsnoise(v)*3.);o=cos(dot(p,normalize(cos(v.yx*9.)))*5.+t*PI2*.1+fsnoise(v)*20.+vec4(0,1.8,1.3,3))*.5+.5;o*=o*vec4(1,1,.4,1);
+#define PI 3.141592653589793
+#define PI2 6.283185307179586
+
+// 2D Simplex Noise by Ian McEwan (Ashima Arts)
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
+
+float snoise(vec2 v) {
+    const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                        -0.577350269189626, 0.024390243902439);
+    vec2 i = floor(v + dot(v, C.yy));
+    vec2 x0 = v - i + dot(i, C.xx);
+    vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+    vec4 x12 = x0.xyxy + C.xxzz;
+    x12.xy -= i1;
+    i = mod(i, 289.0);
+    vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+    m = m * m;
+    m = m * m;
+    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+    vec3 h = abs(x) - 0.5;
+    vec3 ox = floor(x + 0.5);
+    vec3 a0 = x - ox;
+    m *= 1.79284291400159 - 0.85373472095314 * (a0 * a0 + h * h);
+    vec3 g;
+    g.x = a0.x * x0.x + h.x * x0.y;
+    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+    return 130.0 * dot(m, g);
+}
+
+// 2D Rotation Matrix
+mat2 rotate2D(float angle) {
+    float c = cos(angle);
+    float s = sin(angle);
+    return mat2(c, -s, s, c);
+}
+
+void mainImage(out vec4 fragColor, in vec2 fragCoord) 
+{
+    vec2 p = (fragCoord.xy - u_resolution.xy * 0.5) / u_resolution.y;
+    vec2 v = vec2(0.0);
+
+    for (float i = 1.0; i < 1e1; i *= 1.5) {
+        v = floor(0.2 + p * 0.5 * rotate2D(floor(i * 9.0) * PI / 4.0) * i + snoise(v) * 3.0);
+    }
+
+    vec4 o = cos(dot(p, normalize(cos(v.yx * 9.0))) * 5.0 + u_time * PI2 * 0.1 + snoise(v) * 20.0 + vec4(0, 1.8, 1.3, 3)) * 0.5 + 0.5;
+    o *= o * vec4(1, 1, 0.4, 1);
+
+    fragColor = o;
+}
 #endif
 
 #if 0
 
-vec2 p=(FC.xy*2.-r)/r.y,v;for(float i=1.,a,l=log(length(p));i++<9.;)a=mod(i+l/.5-t,10.),o+=(cos(i+vec4(0,1,2,3))+1.)/(1.+.1*l)*(1.-abs(a-5.)/5.)/(.1+length(max(v=sin(vec2(atan(p.y,p.x)+i,l-.2*a/i+i*i)*i)-.5,-v*.3)));o=tanh(o*o*vec4(1,1,1,1)/4e2);
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
+{
+    vec2 r = u_resolution.xy;
+    vec2 p = (fragCoord.xy * 2.0 - r) / r.y;
+    vec2 v;
+    vec4 o = vec4(0.0);
+    float t = u_time;
+    
+    for(float i = 1.0; i < 9.0; i++) {
+        float a = mod(i + log(length(p))/0.5 - t, 10.0);
+        vec2 v = sin(vec2(atan(p.y, p.x) + i, log(length(p)) - 0.2 * a/i + i*i) * i) - 0.5;
+        o += (cos(i + vec4(0,1,2,3)) + 1.0) / 
+             (1.0 + 0.1 * log(length(p))) * 
+             (1.0 - abs(a - 5.0)/5.0) /
+             (0.1 + length(max(v, -v * 0.3)));
+    }
+    
+    o = tanh(o * o * vec4(1,1,1,1) / 400.0);
+    
+    fragColor = o;
+}
 #endif
 
 #if 0
 
-vec2 p=(FC.xy*2.-r)/r.y,v;for(float i=1.,a,l=log(length(p));i++<9.;)a=mod(i+l/.3+t,10.),o+=(cos(i+vec4(6,1,2,3))+1.)/(1.+.1*l)*(1.-abs(a-5.)/5.)/(.1+length(max(v=sin(vec2(atan(p.y,p.x)+i,l-.2*a/i+i*i)*i)-.5,-v.yx*.4)));o=tanh(o*o*vec4(2,1,2,1)/4e2);
+void mainImage(out vec4 fragColor, in vec2 fragCoord)
+{
+    vec2 r = u_resolution.xy;
+    vec2 p = (fragCoord.xy * 2.0 - r) / r.y;
+    vec2 v;
+    vec4 o = vec4(0.0);
+    float t = u_time;
+    
+    for(float i = 1.0; i < 9.0; i++) {
+        float l = log(length(p));
+        float a = mod(i + l/0.3 + t, 10.0);
+        v = sin(vec2(atan(p.y, p.x) + i, l - 0.2 * a/i + i*i) * i) - 0.5;
+        o += (cos(i + vec4(6,1,2,3)) + 1.0) / 
+             (1.0 + 0.1 * l) * 
+             (1.0 - abs(a - 5.0)/5.0) /
+             (0.1 + length(max(v, -v.yx * 0.4)));
+    }
+    
+    o = tanh(o * o * vec4(2,1,2,1) / 400.0);
+    
+    fragColor = o;
+}
 #endif
+
 
 #if 0
 
-vec2 i=r/r,p=(FC.xy-r*.5)*mat2(2,1,-2,4)/4e1,l=p/p*length(p),d;o1+=snoise2D(l)*snoise2D(p*rotate2D(.1*(d=cos(ceil(log(l)/.1)+t*PI2*.1)).x))*(cos(atan(p.y,p.x)+d.x*.5+vec4(0,1,2,0))+1.)*(l.x)*.01;p=p.yy/1e2;for(vec4 S;i.x<16.;i+=1./i)p*=rotate2D(2.4),S=texture(b1,FC.xy/r+p*i/r),o0+=S*=S*=S*=S;o0=tanh(pow(o0,vec4(.2)));
-#endif
+#define PI 3.141592653589793
 
-#if 0
+// 2D Simplex Noise by Ian McEwan (Ashima Arts)
+vec3 permute(vec3 x) { return mod(((x*34.0)+1.0)*x, 289.0); }
 
-vec2 i=r/r,p=(FC.xy-r*.5)*mat2(2,0,1,7)/4e1,l=p/p*length(p),d;o1+=max(snoise2D(l*.4)*snoise2D(p*rotate2D(.01*(d=cos(sin(ceil(log(l)*30.)*1e2)*2e2+t*PI2*.1)).x))*(cos(atan(p.y,p.x)+d.x*.7+vec4(0,1,.5,0))),0.)*sqrt(l.x)*.15;p=p.yy/1e2;for(vec4 S;i.x<16.;i+=1./i)p*=rotate2D(2.4),S=texture(b1,FC.xy/r+p*i/r),o0+=S*=S*=S*=S;o0=tanh(pow(o0,vec4(.3))/vec4(1,1,2,1));
-#endif
+float snoise(vec2 v) 
+{
+    const vec4 C = vec4(0.211324865405187, 0.366025403784439,
+                        -0.577350269189626, 0.024390243902439);
+    vec2 i = floor(v + dot(v, C.yy));
+    vec2 x0 = v - i + dot(i, C.xx);
+    vec2 i1 = (x0.x > x0.y) ? vec2(1.0, 0.0) : vec2(0.0, 1.0);
+    vec4 x12 = x0.xyxy + C.xxzz;
+    x12.xy -= i1;
+    i = mod(i, 289.0);
+    vec3 p = permute(permute(i.y + vec3(0.0, i1.y, 1.0)) + i.x + vec3(0.0, i1.x, 1.0));
+    vec3 m = max(0.5 - vec3(dot(x0,x0), dot(x12.xy,x12.xy), dot(x12.zw,x12.zw)), 0.0);
+    m = m * m;
+    m = m * m;
+    vec3 x = 2.0 * fract(p * C.www) - 1.0;
+    vec3 h = abs(x) - 0.5;
+    vec3 ox = floor(x + 0.5);
+    vec3 a0 = x - ox;
+    m *= 1.79284291400159 - 0.85373472095314 * (a0 * a0 + h * h);
+    vec3 g;
+    g.x = a0.x * x0.x + h.x * x0.y;
+    g.yz = a0.yz * x12.xz + h.yz * x12.yw;
+    return 130.0 * dot(m, g);
+}
 
-#if 0
+#define F(V) (0.1/length((p-clamp(p,-b,b))*(V)) + 0.1/length((p-clamp(p,-vec2(0.2,4.),b.yx))*(V)))
 
-vec2 i=r/r,p=(FC.xy-r*.5)*mat2(2,0,2,-6)/4e1,l=p/p*length(p),d;o1+=max(snoise2D(l*.4)*snoise2D(p*2.*rotate2D(.01*(d=cos(sin(ceil(log(l)*30.)*1e2)*2e2+t*PI2*.1)).x))*(cos(atan(p.y,p.x)*3.+d.x*.7+vec4(0,1,4,0))+1.5),0.)*sqrt(l.x)*.1;p=p.yy/1e2;for(vec4 S;i.x<16.;i+=1./i)p*=rotate2D(2.4),S=texture(b1,FC.xy/r+p*i/r),o0+=S*=S*=S*=S;o0=tanh(pow(o0,vec4(.4)));
-#endif
-
-#if 0
-
-#define F(V) .1/length((p-clamp(p,-b,b))*V)+.1/length((p-clamp(p,-vec2(.2,4),b.yx))*V)
-vec2 b=vec2(2,.2),p=(FC.xy-r*.5)/r.y/.1+b*.5-1.,c=pow(b+cos(t*PI-abs(p.yx)/(.1+.05*length(p)))*b*.2,sign(p)*.5);o.r=F(c);o.g=F(c/c);o.b=F(1./c);o=tanh(o*exp(fsnoise(p)*.1));
+void mainImage(out vec4 fragColor, in vec2 fragCoord) 
+{
+    vec2 b = vec2(2., 0.2);
+    vec2 p = (fragCoord.xy - 0.5 * u_resolution.xy) / (u_resolution.y * 0.1) + b * 0.5 - 1.0;
+    
+    vec2 c = pow(b + cos(u_time * PI - abs(p.yx) / (0.1 + 0.05 * length(p))) * b * 0.2, sign(p) * 0.5);
+    
+    vec3 o;
+    o.r = F(c);
+    o.g = F(c / c);
+    o.b = F(1.0 / c);
+    
+    o = tanh(o * exp(snoise(p) * 0.1));
+    
+    fragColor = vec4(o, 1.0);
+}
 #endif
 
 #if 0
