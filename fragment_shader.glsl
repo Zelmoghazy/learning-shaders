@@ -244,6 +244,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord)
 #if 0
 float rectangle(vec2 uv, vec2 pos, vec2 dim)
 {
+    dim /= 2;
     vec2 d = abs(uv-pos) - dim;
     float l = length(max(d, 0.0)) + min(max(d.x, d.y), 0.0);
     return 1.0 - step(0.0, l);
@@ -252,36 +253,34 @@ float rectangle(vec2 uv, vec2 pos, vec2 dim)
 void mainImage(out vec4 fragColor, in vec2 fragCoord) 
 {   
     float aspect = u_resolution.x / u_resolution.y;
-    vec2 uv = (2.0*fragCoord.xy-u_resolution.xy)/u_resolution.y;
-    uv.x *= aspect;
 
-    float c = rectangle(uv, vec2(0.0, 0.0), vec2(0.3*aspect, 0.3));
+    vec2 uv = (2.0*fragCoord.xy-u_resolution.xy)/u_resolution.y; 
+    uv.x /= aspect;
+
+    vec2 pos = vec2(0.0, 0.0);
+    vec2 dim = vec2(1.0+lt_x, 1.0+lt_y);
+
+    float c = rectangle(uv, pos, dim);
     fragColor = vec4(vec3(c), 1.0);
 } 
 #endif 
 
-#if 0
-float rectangle(vec2 uv, vec2 pos, vec2 dim)
-{
-    vec2 d = abs(uv-pos) - dim;
-    return length(max(d,0.0)) + min(max(d.x,d.y),0.0);
-}
-
+#if 1
 float rounded_rect(vec2 uv, vec2 pos, vec2 dim, float rad)
 {
-    float c = rectangle(uv, pos, dim) - rad;
-    float aa = 0.003;
-    c = 1 - smoothstep(-aa, aa, c);
-    return c;
+    dim /= 2;
+    float d = length(max(abs(uv)-dim+rad, 0.0)) - rad;
+    float blur = 0.003;
+    return 1- smoothstep(-blur, +blur, d);
 }
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) 
 {   
     float aspect = u_resolution.x / u_resolution.y;
-    vec2 uv = (2.0*fragCoord.xy-u_resolution.xy)/u_resolution.y;
-    uv.x *= aspect;
+    vec2 uv = (2.0*fragCoord.xy-u_resolution.xy)/u_resolution.y;  
+    uv.x /= aspect;
 
-    float c = rounded_rect(uv, vec2(0.0,0.0), vec2(0.5*aspect, 0.2), 0.1) ;
+    float c = rounded_rect(uv, vec2(0.0,0.0), vec2(1+lt_y, 1+lt_y), lt_z) ;
     fragColor = vec4(vec3(c), 1.0);
 } 
 #endif 
